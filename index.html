@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>UpDownX V16 | 实时策略中心版</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at top, #26314f 0%, #090b16 55%, #02030a 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 14px;
+    }
+    .app { width: 100%; max-width: 470px; margin: 0 auto; padding-bottom: 30px; }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      margin-bottom: 14px;
+    }
+    .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .title { font-size: 29px; font-weight: 950; line-height: 1.12; letter-spacing: -1px; }
+    .badge { background: rgba(255,255,255,0.13); border-radius: 999px; padding: 8px 12px; font-size: 14px; font-weight: 800; white-space: nowrap; }
+    .price-box { background: rgba(0,0,0,0.28); border-radius: 22px; padding: 16px; margin-bottom: 14px; }
+    .label { color: rgba(255,255,255,0.62); font-size: 14px; margin-bottom: 8px; }
+    .price { font-size: 39px; font-weight: 950; letter-spacing: -1.3px; line-height: 1.1; }
+    .sub { color: rgba(255,255,255,0.68); font-size: 14px; margin-top: 10px; }
+    .green { color: #00d084; }
+    .red { color: #ff4d67; }
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; margin-bottom: 14px; }
+    .stat { background: rgba(255,255,255,0.09); border-radius: 17px; padding: 13px 7px; text-align: center; }
+    .stat strong { display: block; font-size: 23px; margin-bottom: 5px; }
+    .stat span { font-size: 12px; color: rgba(255,255,255,0.58); }
+    .countdown { font-size: 44px; font-weight: 950; text-align: center; min-height: 54px; line-height: 54px; margin-bottom: 10px; }
+    .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 13px; }
+    button, .link-btn {
+      border: 0;
+      border-radius: 17px;
+      padding: 15px 12px;
+      color: #fff;
+      font-weight: 900;
+      font-size: 18px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+      transition: transform 0.08s, opacity 0.2s;
+    }
+    button:active, .link-btn:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .up { background: linear-gradient(135deg, #00d084, #009b62); }
+    .down { background: linear-gradient(135deg, #ff4164, #b41435); }
+    .gold { background: linear-gradient(135deg, #ffb020, #ff7a00); }
+    .blue { background: linear-gradient(135deg, #2aabee, #1477aa); }
+    .purple { background: linear-gradient(135deg, #7c5cff, #4d35d6); }
+    .black { background: linear-gradient(135deg, #111, #333); }
+    .gray { background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.14); }
+    .result {
+      min-height: 86px;
+      background: rgba(0,0,0,0.26);
+      border-radius: 19px;
+      padding: 14px;
+      font-size: 15px;
+      line-height: 1.62;
+      color: rgba(255,255,255,0.88);
+      margin-bottom: 13px;
+    }
+    .reset { width: 100%; background: rgba(255,255,255,0.13); font-size: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.14); margin-bottom: 12px; }
+    .mini-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mini { font-size: 14px; padding: 12px; background: rgba(255,255,255,0.11); border: 1px solid rgba(255,255,255,0.12); }
+    .panel-title { font-size: 18px; font-weight: 950; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .hint { font-size: 12px; color: rgba(255,255,255,0.52); line-height: 1.55; margin-top: 10px; }
+    .grid { display: grid; gap: 10px; }
+    .task {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: rgba(0,0,0,0.22);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .task b { display: block; font-size: 15px; margin-bottom: 4px; }
+    .task span { color: rgba(255,255,255,0.62); font-size: 12px; line-height: 1.4; }
+    .claim { font-size: 13px; padding: 10px 12px; border-radius: 13px; background: linear-gradient(135deg, #ffb020, #ff7a00); white-space: nowrap; }
+    .rank-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.22); border-radius: 15px; padding: 12px 13px;
+      color: rgba(255,255,255,0.86); font-size: 14px;
+    }
+    .rank-item b { color: #fff; font-size: 17px; }
+    .ad-card, .order-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.07));
+      border: 1px dashed rgba(255,255,255,0.26);
+      border-radius: 18px;
+      padding: 14px;
+      line-height: 1.6;
+    }
+    .ad-card b, .order-card b { display: block; margin-bottom: 4px; font-size: 16px; }
+    .ad-card p, .order-card p { margin: 0 0 10px; color: rgba(255,255,255,0.72); font-size: 13px; }
+    .notice {
+      background: rgba(255,176,32,0.12);
+      border: 1px solid rgba(255,176,32,0.25);
+      border-radius: 16px;
+      padding: 12px;
+      color: rgba(255,255,255,0.84);
+      line-height: 1.55;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.74);
+      z-index: 20; padding: 18px; align-items: center; justify-content: center;
+    }
+    .modal {
+      width: 100%; max-width: 430px; max-height: 88vh; overflow-y: auto;
+      background: #111522;
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .modal h2 { margin: 0 0 12px; font-size: 22px; }
+    .modal p { margin: 8px 0; color: rgba(255,255,255,0.78); line-height: 1.58; font-size: 14px; }
+    .close { width: 100%; margin-top: 14px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); font-size: 16px; }
+    .plans { display: grid; gap: 10px; margin-top: 12px; }
+    .plan {
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .plan strong { display: block; font-size: 17px; margin-bottom: 4px; }
+    .plan span { display: block; color: rgba(255,255,255,0.62); font-size: 13px; line-height: 1.4; }
+    .plan em { font-style: normal; font-weight: 950; color: #ffb020; font-size: 18px; }
+    .record {
+      background: rgba(0,0,0,0.22);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.78);
+    }
+
+    .time-select {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .time-btn {
+      padding: 11px 6px;
+      font-size: 13px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.78);
+    }
+    .time-btn.active {
+      background: linear-gradient(135deg, #ffb020, #ff7a00);
+      color: #fff;
+      border-color: rgba(255,176,32,0.65);
+    }
+    .game-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+    .game-info div {
+      background: rgba(0,0,0,0.22);
+      border-radius: 15px;
+      padding: 10px;
+      color: rgba(255,255,255,0.72);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .game-info b {
+      display: block;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+
+    .chain-select {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .chain-btn {
+      padding: 12px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.82);
+      font-weight: 800;
+    }
+    .chain-btn.active {
+      background: linear-gradient(135deg, #23d18b, #0ea5e9);
+      color: #fff;
+      border-color: rgba(35,209,139,0.65);
+    }
+    .agreement {
+      margin: 12px 0;
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 14px;
+      padding: 10px;
+      color: rgba(255,255,255,0.76);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .agreement input {
+      margin-top: 3px;
+      transform: scale(1.15);
+    }
+    .status-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .status-pill {
+      padding: 8px 5px;
+      border-radius: 12px;
+      font-size: 11px;
+      text-align: center;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.72);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .status-pill.active {
+      background: rgba(255,176,32,0.18);
+      color: #ffd89b;
+      border-color: rgba(255,176,32,0.40);
+    }
+    .copy-box {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(0,0,0,0.26);
+      border: 1px dashed rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.76);
+    }
+
+
+
+
+
+
+
+    .strategy-center {
+      margin: 18px 0;
+      padding: 18px;
+      border-radius: 26px;
+      background: rgba(14, 20, 40, 0.78);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .strategy-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .strategy-head h2 {
+      margin:0;
+      color:#fff;
+      font-size:22px;
+    }
+    .strategy-tag {
+      padding:7px 11px;
+      border-radius:999px;
+      background:rgba(35,209,139,0.14);
+      border:1px solid rgba(35,209,139,0.28);
+      color:#bfffe3;
+      font-weight:900;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .event-box {
+      width:100%;
+      min-height:86px;
+      resize:vertical;
+      box-sizing:border-box;
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;
+      padding:12px;
+      background:rgba(0,0,0,0.24);
+      color:#fff;
+      font-size:13px;
+      line-height:1.6;
+      outline:none;
+      margin-top:10px;
+    }
+    .strategy-actions {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+      margin-top:10px;
+    }
+    .strategy-grid {
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+    .strategy-card {
+      padding:13px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.10);
+      color:rgba(255,255,255,0.78);
+      font-size:12px;
+      line-height:1.58;
+    }
+    .strategy-card .top {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .strategy-card h3 {
+      margin:0;
+      color:#fff;
+      font-size:17px;
+    }
+    .bias {
+      padding:5px 9px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:11px;
+      white-space:nowrap;
+    }
+    .bias.long { background:rgba(35,209,139,0.16); color:#9fffd4; }
+    .bias.short { background:rgba(244,63,94,0.16); color:#ffb4c2; }
+    .bias.neutral { background:rgba(255,176,32,0.16); color:#ffd89b; }
+    .level-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin:8px 0;
+    }
+    .level {
+      background:rgba(0,0,0,0.20);
+      border-radius:13px;
+      padding:8px;
+    }
+    .level b {
+      display:block;
+      color:#fff;
+      font-size:13px;
+      margin-top:3px;
+    }
+    .event-impact {
+      margin-top:12px;
+      padding:12px;
+      border-radius:16px;
+      background:rgba(139,92,246,0.10);
+      border:1px solid rgba(139,92,246,0.20);
+      color:rgba(255,255,255,0.76);
+      font-size:12px;
+      line-height:1.6;
+      white-space:pre-wrap;
+    }
+
+    .ai-panel {
+      margin: 18px 0;
+      padding: 18px;
+      border-radius: 26px;
+      background: rgba(16, 24, 46, 0.72);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .ai-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .ai-title h2 {
+      margin: 0;
+      font-size: 22px;
+      color: #fff;
+    }
+    .ai-cost {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255,176,32,0.16);
+      border: 1px solid rgba(255,176,32,0.28);
+      color: #ffd89b;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .ai-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .ai-tab {
+      padding: 10px 3px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.78);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .ai-tab.active {
+      background: linear-gradient(135deg, #8b5cf6, #0ea5e9);
+      color: #fff;
+      border-color: rgba(139,92,246,0.55);
+    }
+    .ai-textarea {
+      width: 100%;
+      min-height: 112px;
+      resize: vertical;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      outline: none;
+      padding: 13px;
+      background: rgba(0,0,0,0.24);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1.6;
+      box-sizing: border-box;
+    }
+    .ai-examples {
+      margin: 10px 0;
+      color: rgba(255,255,255,0.64);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .ai-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 10px;
+    }
+    .ai-answer {
+      margin-top: 13px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .ai-answer strong {
+      color: #fff;
+    }
+
+    .ai-records {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .ai-record {
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.66);
+      font-size: 12px;
+      line-height: 1.55;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .notify-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(14,165,233,0.10);
+      border: 1px solid rgba(14,165,233,0.22);
+      color: rgba(255,255,255,0.76);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .notify-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .notify-actions .link-btn {
+      margin: 0;
+    }
+    .status-mini {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .status-mini div {
+      border-radius: 11px;
+      padding: 7px 4px;
+      text-align: center;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.66);
+      font-size: 10px;
+      line-height: 1.25;
+    }
+    .status-mini div.active {
+      background: rgba(35,209,139,0.16);
+      color: #bfffe3;
+      border: 1px solid rgba(35,209,139,0.26);
+    }
+
+    .brand-hero {
+      margin: 12px 0 16px;
+      border-radius: 24px;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(79,140,255,0.20), rgba(255,176,32,0.12));
+      border: 1px solid rgba(255,255,255,0.13);
+    }
+    .brand-hero h3 { margin: 0 0 6px; font-size: 18px; color: #fff; }
+    .brand-hero p { margin: 0; color: rgba(255,255,255,0.72); font-size: 13px; line-height: 1.55; }
+    .user-card {
+      margin: 14px 0 18px;
+      padding: 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.11);
+    }
+    .user-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 10px; }
+    .user-grid div {
+      border-radius: 15px; padding: 10px; background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.70); font-size: 12px; line-height: 1.45;
+    }
+    .user-grid b { display: block; color: #fff; font-size: 14px; margin-top: 3px; word-break: break-all; }
+    .invite-box {
+      margin-top: 10px; padding: 10px; border-radius: 15px;
+      background: rgba(35,209,139,0.10); border: 1px solid rgba(35,209,139,0.18);
+      color: rgba(255,255,255,0.78); font-size: 12px; line-height: 1.55; word-break: break-all;
+    }
+    .mini-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .mini-btn {
+      padding: 10px 8px; border-radius: 14px; border: 0; font-weight: 900; color: #fff;
+      background: rgba(255,255,255,0.13);
+    }
+    .mini-btn.primary { background: linear-gradient(135deg, #4f8cff, #8b5cf6); }
+    .mini-btn.green { background: linear-gradient(135deg, #23d18b, #0ea5e9); }
+    .invite-rank { margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.70); line-height: 1.55; }
+
+    .price.flash-up {
+      color: #23d18b;
+      text-shadow: 0 0 18px rgba(35,209,139,0.20);
+    }
+    .price.flash-down {
+      color: #f43f5e;
+      text-shadow: 0 0 18px rgba(244,63,94,0.20);
+    }
+    .live-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      color: rgba(255,255,255,0.58);
+      font-size: 12px;
+    }
+    .live-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .live-dot::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #23d18b;
+      box-shadow: 0 0 10px rgba(35,209,139,0.75);
+      animation: pulseLive 1s infinite;
+    }
+    @keyframes pulseLive {
+      0%, 100% { opacity: .45; transform: scale(.85); }
+      50% { opacity: 1; transform: scale(1.12); }
+    }
+
+    .coin-select {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .coin-btn {
+      padding: 11px 5px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.13);
+      background: rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.78);
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .coin-btn.active {
+      background: linear-gradient(135deg, #4f8cff, #8b5cf6);
+      color: #fff;
+      border-color: rgba(79,140,255,0.65);
+    }
+    .chart-panel {
+      margin: 14px 0 18px;
+      padding: 14px;
+      border-radius: 22px;
+      background: rgba(10, 18, 36, 0.52);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .chart-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+    }
+    .chart-badge {
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,176,32,0.16);
+      border: 1px solid rgba(255,176,32,0.26);
+      color: #ffd89b;
+      white-space: nowrap;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 190px;
+      border-radius: 18px;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px),
+        rgba(0,0,0,0.22);
+      background-size: 100% 25%, 25% 100%, auto;
+    }
+    #priceChart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .chart-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chart-meta div {
+      border-radius: 14px;
+      padding: 9px;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.70);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .chart-meta b {
+      display: block;
+      margin-top: 3px;
+      font-size: 13px;
+      color: #fff;
+      word-break: break-all;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.25);
+      padding: 13px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      margin-top: 8px;
+    }
+    .address {
+      word-break: break-all;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px;
+      padding: 12px;
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+  </style>
+  <meta name="description" content="UpDownX 多币种涨跌挑战平台：实时行情、多币种挑战、AI信号社群。" />
+  <meta property="og:title" content="UpDownX | 多币种涨跌挑战平台" />
+  <meta property="og:description" content="实时行情 · 多币种挑战 · AI信号社群" />
+</head>
+
+<body>
+  <main class="app">
+    <section class="card">
+      <div class="top">
+        <div class="title">UpDownX<br /><span style="font-size:18px;color:rgba(255,255,255,.72);">多币种涨跌挑战平台</span></div>
+        <div class="badge" id="pairBadge">BTC / USDT</div>
+      </div>
+
+      <div class="brand-hero">
+        <h3>UpDownX</h3>
+        <p>实时行情 · 多币种涨跌挑战 · AI信号社群。V16支持主流币实时策略、AI策略点位、合约研判和Telegram订单提交；金币仅用于娱乐体验和平台权益，不可提现、不承诺收益。</p>
+      </div>
+
+      <div class="user-card">
+        <div class="panel-title">我的账号 <span>用户ID / 邀请码</span></div>
+        <div class="user-grid">
+          <div>用户ID<b id="userIdText">--</b></div>
+          <div>邀请码<b id="inviteCodeText">--</b></div>
+          <div>邀请人数<b id="inviteCountText">0</b></div>
+          <div>可领邀请奖励<b id="inviteRewardText">0 金币</b></div>
+        </div>
+        <div class="invite-box" id="inviteLinkText">正在生成邀请链接...</div>
+        <div class="mini-actions">
+          <button class="mini-btn primary" onclick="copyInviteLink()">复制邀请链接</button>
+          <button class="mini-btn green" onclick="claimInviteReward()">领取邀请奖励</button>
+        </div>
+        <div class="invite-rank" id="inviteRankText">邀请好友打开你的链接，每个有效邀请奖励 100 金币。</div>
+      </div>
+
+      <div class="label">选择币种</div>
+      <div class="coin-select">
+        <button id="coinBTCUSDT" class="coin-btn active" onclick="setSymbol('BTCUSDT')">BTC</button>
+        <button id="coinETHUSDT" class="coin-btn" onclick="setSymbol('ETHUSDT')">ETH</button>
+        <button id="coinBNBUSDT" class="coin-btn" onclick="setSymbol('BNBUSDT')">BNB</button>
+        <button id="coinSOLUSDT" class="coin-btn" onclick="setSymbol('SOLUSDT')">SOL</button>
+        <button id="coinDOGEUSDT" class="coin-btn" onclick="setSymbol('DOGEUSDT')">DOGE</button>
+      </div>
+
+      <div class="price-box">
+        <div class="label">当前 <span id="coinName">BTC</span> 价格</div>
+        <div id="price" class="price">加载中...</div>
+        <div id="change" class="sub">正在读取行情...</div>
+        <div class="live-row"><span class="live-dot">动态价格</span><span>真实行情每5秒同步</span></div>
+      </div>
+
+      <div class="chart-panel">
+        <div class="chart-head">
+          <div class="chart-title"><span id="chartPairTitle">BTC/USDT</span> 实时行情图</div>
+          <div class="chart-badge">最近30个价格点</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="priceChart"></canvas>
+        </div>
+        <div class="chart-meta">
+          <div>刷新频率<b>5秒</b></div>
+          <div>最高价<b id="chartHigh">--</b></div>
+          <div>最低价<b id="chartLow">--</b></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><strong id="coins">100</strong><span>金币</span></div>
+        <div class="stat"><strong id="streak">0</strong><span>连胜</span></div>
+        <div class="stat"><strong id="rounds">0</strong><span>局数</span></div>
+      </div>
+
+      <div class="label">开奖时间</div>
+      <div class="time-select">
+        <button id="time10" class="time-btn" onclick="setDuration(10)">10秒</button>
+        <button id="time15" class="time-btn active" onclick="setDuration(15)">15秒</button>
+        <button id="time30" class="time-btn" onclick="setDuration(30)">30秒</button>
+        <button id="time60" class="time-btn" onclick="setDuration(60)">60秒</button>
+      </div>
+
+      <div class="game-info">
+        <div><b id="costText">10 金币</b>每局成本</div>
+        <div><b id="rewardText">+15 金币</b>猜对奖励</div>
+      </div>
+
+      <div id="countdown" class="countdown"></div>
+
+      <div class="buttons">
+        <button id="btnUp" class="up" onclick="play('up')">看涨</button>
+        <button id="btnDown" class="down" onclick="play('down')">看跌</button>
+      </div>
+
+      <div id="result" class="result">
+        V16 实时策略中心版：主流币全局策略、做多/做空观察位、大事件影响分析和突发事件输入。
+      </div>
+
+      <button class="reset" onclick="resetGame()">重新开始</button>
+
+      <div class="mini-actions">
+        <button class="mini" onclick="openRules()">游戏规则</button>
+        <button class="mini gold" onclick="openManualRecharge()">人工充值</button>
+      </div>
+
+      <div class="notice">
+        合规提醒：金币仅是娱乐积分，不可提现，不可兑换现金，不构成投资收益。本页面不得用于赌博或返钱承诺。
+      </div>
+    </section>
+
+    <section class="card">
+      
+
+    <div class="strategy-center">
+      <div class="strategy-head">
+        <h2>实时策略中心</h2>
+        <div class="strategy-tag">主流币全局研判</div>
+      </div>
+      <div class="muted">
+        根据 BTC / ETH / BNB / SOL / DOGE 实时价格生成娱乐挑战用点位：做多观察位、做空观察位、无效位和震荡区。新闻和突发事件可手动输入，后续可接新闻接口。
+      </div>
+
+      <textarea id="eventInput" class="event-box" placeholder="输入今日大事件/突发事件，例如：美联储利率、BTC ETF资金流、币安公告、项目解锁、大户转账、黑客攻击等。"></textarea>
+
+      <div class="strategy-actions">
+        <button class="mini-btn primary" onclick="refreshStrategy(true)">消耗金币生成策略</button>
+        <button class="mini-btn green" onclick="fillEventExample()">填入今日事件示例</button>
+      </div>
+
+      <div id="eventImpact" class="event-impact">等待生成策略。说明：未接新闻后端时，请手动粘贴大事件/突发事件，系统会纳入策略分析。</div>
+      <div id="strategyGrid" class="strategy-grid"></div>
+    </div>
+
+    <div class="ai-panel">
+      <div class="ai-title">
+        <h2>AI 策略分析</h2>
+        <div class="ai-cost">30 金币 / 次</div>
+      </div>
+      <div class="muted">支持行情问答、合约深度分析、币圈大事件、综合研判和策略点位。所有内容仅用于游戏娱乐体验，不构成投资建议。</div>
+
+      <div class="ai-tabs">
+        <button id="aiTabChat" class="ai-tab active" onclick="setAiMode('chat')">行情问答</button>
+        <button id="aiTabContract" class="ai-tab" onclick="setAiMode('contract')">合约分析</button>
+        <button id="aiTabNews" class="ai-tab" onclick="setAiMode('news')">大事件</button>
+        <button id="aiTabDeep" class="ai-tab" onclick="setAiMode('deep')">深度研判</button>
+        <button id="aiTabStrategy" class="ai-tab" onclick="setAiMode('strategy')">策略点位</button>
+      </div>
+
+      <textarea id="aiQuestion" class="ai-textarea" placeholder="例如：BTC 现在适合看涨还是看跌？"></textarea>
+      <div id="aiExamples" class="ai-examples"></div>
+
+      <div class="ai-actions">
+        <button class="mini-btn primary" onclick="askAi()">消耗金币并分析</button>
+        <button class="mini-btn green" onclick="fillAiExample()">填入示例</button>
+      </div>
+
+      <div id="aiAnswer" class="ai-answer">AI助手已准备好。请选择功能并输入问题。</div>
+
+      <div class="panel-title" style="margin-top:14px;">AI 使用记录 <span id="aiUsedText">0次</span></div>
+      <div id="aiRecords" class="ai-records"></div>
+    </div>
+
+<div class="panel-title">V16 人工充值中心 <span>USDT / 专业订单</span></div>
+      <div class="grid">
+        <button class="link-btn gold" onclick="openManualRecharge()">生成充值订单</button>
+        <button class="link-btn blue" onclick="contactSupport()">联系 Telegram 客服</button>
+        <button class="link-btn gray" onclick="openAdmin()">管理员加金币</button>
+        <div class="rank-item"><span>累计充值金币</span><b id="totalRecharge">0</b></div>
+      </div>
+      <p class="hint">人工充值流程：选择链路 → 勾选协议 → 选择套餐 → 复制订单和地址 → 转账 → 联系客服提交订单号、链路、金额和截图 → 人工确认后加金币。</p>
+    </section>
+
+    <section class="card">
+      <div class="panel-title">任务中心 <span>赚金币</span></div>
+      <div class="grid">
+        <div class="task">
+          <div><b>每日签到</b><span>每天领取一次，增加用户回访。</span></div>
+          <button id="signBtn" class="claim" onclick="dailySign()">+50</button>
+        </div>
+        <div class="task">
+          <div><b>加入 Telegram 群</b><span>点击进群后回来领取奖励。</span></div>
+          <button id="tgRewardBtn" class="claim" onclick="claimTask('tg', 80)">+80</button>
+        </div>
+        <div class="task">
+          <div><b>关注 X / Twitter</b><span>点击关注后回来领取奖励。</span></div>
+          <button id="xRewardBtn" class="claim" onclick="claimTask('x', 80)">+80</button>
+        </div>
+        <div class="task">
+          <div><b>分享给朋友</b><span>复制或系统分享链接，获得奖励。</span></div>
+          <button id="shareRewardBtn" class="claim" onclick="shareAndClaim()">+100</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="panel-title">加入社群</div>
+      <div class="grid">
+        <a id="tgLink" class="link-btn blue" href="https://t.me/" target="_blank">加入 Telegram 群</a>
+        <a id="xLink" class="link-btn black" href="https://x.com/" target="_blank">关注 X / Twitter</a>
+        <button class="purple" onclick="shareGame()">分享给朋友</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="panel-title">排行榜</div>
+      <div class="grid">
+        <div class="rank-item"><span>最高金币</span><b id="bestCoins">100</b></div>
+        <div class="rank-item"><span>最高连胜</span><b id="bestStreak">0</b></div>
+        <div class="rank-item"><span>累计局数</span><b id="totalRounds">0</b></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="panel-title">充值订单记录</div>
+      <div id="orderRecords" class="grid">
+        <div class="record">暂无充值订单。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="panel-title">变现广告位</div>
+      <div class="grid">
+        <div class="ad-card">
+          <b>广告位 1：交易所/工具入口</b>
+          <p>这里放你的开户链接、Telegram 机器人、币圈工具、课程资源。</p>
+          <a id="ad1" class="link-btn gold" href="https://t.me/" target="_blank">查看推荐工具</a>
+        </div>
+        <div class="ad-card">
+          <b>广告位 2：AI 币圈情报系统</b>
+          <p>引导用户加入群，后续卖会员、卖信号、卖工具、卖自动化服务。</p>
+          <a id="ad2" class="link-btn blue" href="https://t.me/" target="_blank">加入情报社群</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="rulesModal" class="modal-bg">
+    <div class="modal">
+      <h2>游戏规则</h2>
+      <p>1. 先选择币种：BTC、ETH、BNB、SOL、DOGE，再选择开奖时间：10秒、15秒、30秒、60秒。</p>
+      <p>2. 点击“看涨”或“看跌”后，系统才会锁定当前所选币种价格并开始倒计时。</p>
+      <p>3. 页面价格每0.5秒动态跳动，但下注锁价和开奖结算都读取真实行情接口。</p>
+      <p>4. 倒计时期间不能重复下注，也不能切换时间。</p>
+      <p>5. 价格波动小于 0.01% 判定为震荡局，退还本局成本。</p>
+      <p>6. 人工充值只用于购买娱乐金币，不代表任何投资收益。</p>
+      <p>7. V16 增加主流币实时策略中心、做多/做空观察位、大事件影响矩阵和用户ID绑定。</p>
+      <p>8. 金币是娱乐积分，不是现金，不可提现，不得用于赌博、返钱或承诺收益。</p>
+      <button class="close" onclick="closeRules()">知道了</button>
+    </div>
+  </div>
+
+  <div id="manualRechargeModal" class="modal-bg">
+    <div class="modal">
+      <h2>V7 人工充值</h2>
+      <p>先选择充值链路，再勾选协议，最后选择套餐生成订单。付款后可一键打开 Telegram 客服，发送订单信息和付款截图。</p>
+
+      <div class="status-row">
+        <div class="status-pill active">1 生成订单</div>
+        <div class="status-pill">2 客服确认</div>
+        <div class="status-pill">3 管理员加金币</div>
+      </div>
+
+      <div class="label">选择充值链路</div>
+      <div class="chain-select">
+        <button id="chainTRC20" class="chain-btn active" onclick="setPayChain('TRC20')">USDT-TRC20</button>
+        <button id="chainBEP20" class="chain-btn" onclick="setPayChain('BEP20')">USDT-BEP20</button>
+      </div>
+
+      <label class="agreement">
+        <input id="rechargeAgreement" type="checkbox" />
+        <span>
+          我确认：金币仅用于娱乐体验和平台权益，不可提现，不可兑换现金，不构成投资收益；请核对链路，转错链路可能无法找回。
+        </span>
+      </label>
+
+      <div class="plans">
+        <button class="plan" onclick="createOrder('体验包', 1000, 10)">
+          <span><strong>体验包</strong><span>适合新用户试玩</span></span>
+          <em>10 USDT / 1000</em>
+        </button>
+        <button class="plan" onclick="createOrder('进阶包', 3500, 30)">
+          <span><strong>进阶包</strong><span>额外赠送 500 金币</span></span>
+          <em>30 USDT / 3500</em>
+        </button>
+        <button class="plan" onclick="createOrder('豪华包', 12000, 98)">
+          <span><strong>豪华包</strong><span>适合高频体验用户</span></span>
+          <em>98 USDT / 12000</em>
+        </button>
+      </div>
+
+      <div id="currentOrderBox" style="display:none;" class="order-card">
+        <b>待支付订单</b>
+        <p id="orderInfo"></p>
+        <div class="address">
+          <b id="payAddressTitle">USDT-TRC20 地址：</b>
+          <span id="payAddress"></span>
+        </div>
+        <div class="copy-box" id="supportMessageBox"></div>
+        <div class="notify-box">
+          <b>V12 提交方式</b><br>
+          1. 先复制客服提交信息；<br>
+          2. 打开 Telegram 客服；<br>
+          3. 粘贴订单信息并发送付款截图；<br>
+          4. 管理员确认到账后加金币。
+          <div class="status-mini">
+            <div class="active">生成订单</div>
+            <div>复制信息</div>
+            <div>提交截图</div>
+            <div>确认加币</div>
+          </div>
+        </div>
+        <div class="notify-actions">
+          <button class="link-btn gray" onclick="copyPayInfo()">复制订单和地址</button>
+          <button class="link-btn gold" onclick="copySupportMessage()">复制客服提交信息</button>
+          <button class="link-btn blue" onclick="sendTelegramOrder()">一键打开 Telegram 提交订单</button>
+          <button class="link-btn green" onclick="notifyOrderBackend()">尝试后端自动通知</button>
+        </div>
+      </div>
+
+      <div class="notice">
+        说明：V12 是安全通知版，不在前端暴露 Telegram Bot Token。用户付款后提交订单和截图；管理员确认到账后再手动加金币。真正自动通知需要接 Cloudflare Worker / Railway 后端。
+      </div>
+      <button class="close" onclick="closeManualRecharge()">关闭</button>
+    </div>
+  </div>
+
+  <div id="adminModal"  <div id="adminModal" class="modal-bg">
+    <div class="modal">
+      <h2>管理员确认充值</h2>
+      <p>确认用户付款到账后，再输入密码和金币数量。本静态版只在当前手机浏览器本地加金币；真实运营需要数据库后台。</p>
+      <input id="adminPass" class="input" placeholder="输入管理员密码" type="password" />
+      <input id="adminOrderId" class="input" placeholder="输入订单号，例如 CZ123456789，可选" />
+      <input id="adminCoins" class="input" placeholder="输入增加金币数量，例如 1000" type="number" />
+      <button class="link-btn gold" onclick="adminAddCoins()">确认到账并加金币</button>
+      <button class="close" onclick="closeAdmin()">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    const SYMBOLS = {
+      BTCUSDT: { name: "BTC", pair: "BTC/USDT", api: "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT" },
+      ETHUSDT: { name: "ETH", pair: "ETH/USDT", api: "https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT" },
+      BNBUSDT: { name: "BNB", pair: "BNB/USDT", api: "https://api.binance.com/api/v3/ticker/24hr?symbol=BNBUSDT" },
+      SOLUSDT: { name: "SOL", pair: "SOL/USDT", api: "https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT" },
+      DOGEUSDT: { name: "DOGE", pair: "DOGE/USDT", api: "https://api.binance.com/api/v3/ticker/24hr?symbol=DOGEUSDT" }
+    };
+    let selectedSymbol = localStorage.getItem("selectedSymbol") || "BTCUSDT";
+    if (!SYMBOLS[selectedSymbol]) selectedSymbol = "BTCUSDT";
+
+    function symbolInfo() {
+      return SYMBOLS[selectedSymbol] || SYMBOLS.BTCUSDT;
+    }
+
+    function currentApi() {
+      return symbolInfo().api;
+    }
+
+// ====== V6 玩法参数 ======
+const ROUND_COST = 10;          // 每局成本
+const FLAT_THRESHOLD = 0.0001;  // 震荡门槛：0.01%
+const REWARD_MAP = {
+  10: 10,
+  15: 15,
+  30: 25,
+  60: 40
+};
+// ========================
+
+    // ====== 你后面主要改这里 ======
+    const TELEGRAM_LINK = "https://t.me/+nOg_s0nTJns2YTNk";       // 你的 Telegram 群
+    const X_LINK = "https://x.com/Znmzsy";             // 你的 X/Twitter
+    const SUPPORT_LINK = "https://t.me/lei_v4_signal_bot";        // 你的 Telegram 客服
+    const AD_LINK_1 = "https://t.me/+nOg_s0nTJns2YTNk";           // 广告位 1
+    const AD_LINK_2 = "https://t.me/lei_v4_signal_bot";           // 广告位 2
+
+    const USDT_TRC20_ADDRESS = "TTwHi8htPqojiKyX4LhxmEgK65phYFZtbP";
+    const USDT_BEP20_ADDRESS = "0xBf7ad8f3FD67F2fb70BE75DC5e49Eeb36a821622";
+
+    // 演示密码。上线前不要把真实后台密码写在前端。
+    const ADMIN_PASSWORD = "zhouleisheng123";
+    const INVITE_REWARD = 100;
+    const BRAND_NAME = "UpDownX";
+    // V12 安全说明：
+    // 静态网页不要直接写 Telegram Bot Token，否则任何人都能看到。
+    // 后续如果接 Cloudflare Worker / Railway，可把接口填到这里，例如：
+    // const ORDER_NOTIFY_API = "https://你的后端域名/notify-order";
+    const ORDER_NOTIFY_API = "";
+    // V13 AI 后端接口预留：
+    // 不要把 OpenAI / Claude API Key 写进 index.html。
+    // 后续可接 Cloudflare Worker / Railway，例如：
+    // const AI_API = "https://你的后端域名/ai";
+    const AI_API = "";
+    const AI_COST = 30;
+    const STRATEGY_COST = 30;
+    // ============================
+
+    let startPrice = 0;
+    let currentPrice = 0;
+    let realPrice = 0;
+    let displayPrice = 0;
+    let lastDisplayPrice = 0;
+    let dynamicTimer = null;
+    let apiTimer = null;
+    let chartTick = 0;
+    let chartPrices = JSON.parse(localStorage.getItem("chartPrices_" + selectedSymbol) || "[]");
+    let selectedDuration = Number(localStorage.getItem("selectedDuration") || 15);
+    let coins = Number(localStorage.getItem("coins") || 100);
+    let streak = Number(localStorage.getItem("streak") || 0);
+    let rounds = Number(localStorage.getItem("rounds") || 0);
+    let bestCoins = Number(localStorage.getItem("bestCoins") || coins);
+    let bestStreak = Number(localStorage.getItem("bestStreak") || streak);
+    let totalRounds = Number(localStorage.getItem("totalRounds") || rounds);
+    let totalRecharge = Number(localStorage.getItem("totalRecharge") || 0);
+    let currentOrderText = "";
+    let currentSupportText = "";
+    let userId = localStorage.getItem("updownx_user_id") || "";
+    let inviteCode = localStorage.getItem("updownx_invite_code") || "";
+    let inviteCount = Number(localStorage.getItem("updownx_invite_count") || 0);
+    let inviteRewardClaimed = Number(localStorage.getItem("updownx_invite_reward_claimed") || 0);
+    let invitedBy = localStorage.getItem("updownx_invited_by") || "";
+    let aiMode = localStorage.getItem("updownx_ai_mode") || "chat";
+    let aiUsed = Number(localStorage.getItem("updownx_ai_used") || 0);
+    let selectedPayChain = localStorage.getItem("selectedPayChain") || "TRC20";
+    let playing = false;
+
+    function $(id) { return document.getElementById(id); }
+
+    function fmt(n) {
+      return Number(n).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function todayKey() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    function save() {
+      bestCoins = Math.max(bestCoins, coins);
+      bestStreak = Math.max(bestStreak, streak);
+      localStorage.setItem("coins", coins);
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("rounds", rounds);
+      localStorage.setItem("bestCoins", bestCoins);
+      localStorage.setItem("bestStreak", bestStreak);
+      localStorage.setItem("totalRounds", totalRounds);
+      localStorage.setItem("totalRecharge", totalRecharge);
+    }
+
+    function getOrders() {
+      try {
+        return JSON.parse(localStorage.getItem("manualOrders") || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function setOrders(records) {
+      localStorage.setItem("manualOrders", JSON.stringify(records.slice(0, 20)));
+    }
+
+    function renderOrders() {
+      const records = getOrders();
+      if (records.length === 0) {
+        $("orderRecords").innerHTML = '<div class="record">暂无充值订单。</div>';
+        return;
+      }
+      $("orderRecords").innerHTML = records.map(r =>
+        `<div class="record">🧾 ${r.time}<br>用户ID：${r.userId || userId}<br>订单号：${r.id}<br>链路：USDT-${r.chain || "TRC20"}<br>${r.name}：${r.price} USDT / ${r.coins} 金币<br>状态：${r.status}<br>提示：付款后联系客服提交截图，确认后加金币。</div>`
+      ).join("");
+    }
+
+    function render() {
+      $("coins").textContent = coins;
+      $("streak").textContent = streak;
+      $("rounds").textContent = rounds;
+      $("bestCoins").textContent = bestCoins;
+      $("bestStreak").textContent = bestStreak;
+      $("totalRounds").textContent = totalRounds;
+      $("totalRecharge").textContent = totalRecharge;
+
+      $("tgLink").href = TELEGRAM_LINK;
+      $("xLink").href = X_LINK;
+      $("ad1").href = AD_LINK_1;
+      $("ad2").href = AD_LINK_2;
+
+      const lastSign = localStorage.getItem("lastSignDate");
+      $("signBtn").disabled = lastSign === todayKey();
+      $("signBtn").textContent = lastSign === todayKey() ? "已领" : "+50";
+
+      ["tg", "x", "share"].forEach(k => {
+        const btn = $(k === "tg" ? "tgRewardBtn" : k === "x" ? "xRewardBtn" : "shareRewardBtn");
+        if (localStorage.getItem("task_" + k) === "done") {
+          btn.disabled = true;
+          btn.textContent = "已领";
+        }
+      });
+
+      [10, 15, 30, 60].forEach(sec => {
+        const btn = $("time" + sec);
+        if (btn) btn.classList.toggle("active", sec === selectedDuration);
+      });
+      $("costText").textContent = ROUND_COST + " 金币";
+      $("rewardText").textContent = "+" + REWARD_MAP[selectedDuration] + " 金币";
+
+      if ($("chainTRC20")) $("chainTRC20").classList.toggle("active", selectedPayChain === "TRC20");
+      if ($("chainBEP20")) $("chainBEP20").classList.toggle("active", selectedPayChain === "BEP20");
+
+      updateSymbolUi();
+      renderUserIdentity();
+      renderAi();
+      renderOrders();
+      drawChart();
+    }
+
+
+
+
+
+
+    function fillEventExample() {
+      if ($("eventInput")) {
+        $("eventInput").value =
+          "今日重点：BTC ETF资金流、美联储利率预期、币安新币公告、项目解锁、大户转账。请综合判断主流币短线做多/做空观察位。";
+      }
+      $("result").textContent = "已填入大事件示例，可以点击生成策略。";
+    }
+
+    function classifyEventImpact(text) {
+      const t = String(text || "").toLowerCase();
+      let score = 0;
+      const hits = [];
+
+      const positive = ["etf流入", "资金流入", "降息", "上币", "launchpool", "利好", "合作", "回购", "升级", "主网"];
+      const negative = ["etf流出", "资金流出", "加息", "黑客", "攻击", "漏洞", "解锁", "大户转入交易所", "监管", "下架", "暂停"];
+
+      positive.forEach(k => {
+        if (t.includes(k.toLowerCase())) { score += 1; hits.push("利好:" + k); }
+      });
+      negative.forEach(k => {
+        if (t.includes(k.toLowerCase())) { score -= 1; hits.push("利空:" + k); }
+      });
+
+      let mood = "中性";
+      if (score >= 2) mood = "偏利好";
+      if (score <= -2) mood = "偏利空";
+      if (score === 1) mood = "轻微利好";
+      if (score === -1) mood = "轻微利空";
+
+      return { score, mood, hits };
+    }
+
+    async function fetchTicker(symbol) {
+      const info = SYMBOLS[symbol];
+      const res = await fetch(info.api, { cache: "no-store" });
+      if (!res.ok) throw new Error("ticker failed");
+      const data = await res.json();
+      return {
+        symbol,
+        name: info.name,
+        pair: info.pair,
+        price: Number(data.lastPrice),
+        pct: Number(data.priceChangePercent),
+        high: Number(data.highPrice),
+        low: Number(data.lowPrice)
+      };
+    }
+
+    function buildStrategyForTicker(ticker, event) {
+      const price = ticker.price;
+      const dayRange = Math.max(ticker.high - ticker.low, price * 0.001);
+      const vol = Math.min(Math.max(dayRange / price, 0.0012), 0.05);
+
+      let bias = "震荡";
+      if (ticker.pct > 1.2) bias = "偏多";
+      if (ticker.pct < -1.2) bias = "偏空";
+
+      if (event.score >= 2 && ticker.pct > -2) bias = "偏多";
+      if (event.score <= -2 && ticker.pct < 2) bias = "偏空";
+
+      const longTrigger = price * (1 + vol * 0.08);
+      const shortTrigger = price * (1 - vol * 0.08);
+      const longInvalid = price * (1 - vol * 0.12);
+      const shortInvalid = price * (1 + vol * 0.12);
+      const longTarget = price * (1 + vol * 0.16);
+      const shortTarget = price * (1 - vol * 0.16);
+
+      let playTime = "30秒 / 60秒";
+      if (Math.abs(ticker.pct) < 0.5) playTime = "15秒 / 30秒，谨慎";
+      if (Math.abs(ticker.pct) > 4) playTime = "30秒 / 60秒，但防追高追空";
+
+      let risk = "中";
+      if (Math.abs(ticker.pct) > 5) risk = "高";
+      if (event.score <= -2) risk = "中高";
+      if (ticker.name === "DOGE" || ticker.name === "SOL") risk = risk === "高" ? "高" : "中高";
+
+      return {
+        ...ticker,
+        bias,
+        longTrigger,
+        shortTrigger,
+        longInvalid,
+        shortInvalid,
+        longTarget,
+        shortTarget,
+        playTime,
+        risk
+      };
+    }
+
+    function renderStrategyCards(items, event) {
+      if (!$("strategyGrid")) return;
+
+      $("strategyGrid").innerHTML = items.map(s => {
+        const biasClass = s.bias === "偏多" ? "long" : s.bias === "偏空" ? "short" : "neutral";
+        return `
+          <div class="strategy-card">
+            <div class="top">
+              <h3>${s.pair}</h3>
+              <span class="bias ${biasClass}">${s.bias}</span>
+            </div>
+            当前价：$${fmt(s.price)}　24H：${s.pct >= 0 ? "+" : ""}${s.pct.toFixed(2)}%　风险：${s.risk}<br>
+            适合时间：${s.playTime}
+            <div class="level-grid">
+              <div class="level">做多观察位<b>$${fmt(s.longTrigger)}</b></div>
+              <div class="level">做多无效位<b>$${fmt(s.longInvalid)}</b></div>
+              <div class="level">做空观察位<b>$${fmt(s.shortTrigger)}</b></div>
+              <div class="level">做空无效位<b>$${fmt(s.shortInvalid)}</b></div>
+            </div>
+            参考目标：做多 $${fmt(s.longTarget)} / 做空 $${fmt(s.shortTarget)}<br>
+            震荡区：$${fmt(s.shortTrigger)} ~ $${fmt(s.longTrigger)}，中间区域不建议强行判断。
+          </div>
+        `;
+      }).join("");
+
+      if ($("eventImpact")) {
+        $("eventImpact").textContent =
+`【大事件影响】
+事件情绪：${event.mood}
+识别关键词：${event.hits.length ? event.hits.join("，") : "未识别到明显关键词"}
+策略原则：
+1. 利好事件下，优先观察 BTC / ETH 是否带动全场。
+2. 利空事件下，优先防守，避免追多。
+3. 上币、公告、解锁、大户转账会让单币波动变大。
+4. 点位只用于 UpDownX 游戏娱乐挑战，不构成真实合约交易建议。`;
+      }
+    }
+
+    async function refreshStrategy(useCost = false) {
+      if (useCost) {
+        if (coins < STRATEGY_COST) {
+          $("result").innerHTML = `金币不足。生成实时策略需要 ${STRATEGY_COST} 金币。`;
+          return;
+        }
+        coins -= STRATEGY_COST;
+        save();
+        render();
+      }
+
+      const eventText = $("eventInput") ? $("eventInput").value : "";
+      const event = classifyEventImpact(eventText);
+
+      if ($("eventImpact")) $("eventImpact").textContent = "正在读取主流币实时行情并生成策略...";
+      try {
+        const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "DOGEUSDT"];
+        const tickers = await Promise.all(symbols.map(fetchTicker));
+        const strategies = tickers.map(t => buildStrategyForTicker(t, event));
+        renderStrategyCards(strategies, event);
+        $("result").innerHTML = useCost
+          ? `✅ 已消耗 ${STRATEGY_COST} 金币，生成主流币实时策略。`
+          : "主流币实时策略已刷新。";
+      } catch (err) {
+        if ($("eventImpact")) $("eventImpact").textContent = "策略生成失败：行情接口读取失败，请稍后重试。";
+        if (useCost) {
+          coins += STRATEGY_COST;
+          save();
+          render();
+          $("result").textContent = "行情读取失败，已退回本次策略消耗金币。";
+        }
+      }
+    }
+
+    function getAiRecords() {
+      return JSON.parse(localStorage.getItem("updownx_ai_records") || "[]");
+    }
+
+    function setAiRecords(records) {
+      localStorage.setItem("updownx_ai_records", JSON.stringify(records.slice(0, 10)));
+    }
+
+    function setAiMode(mode) {
+      aiMode = mode;
+      localStorage.setItem("updownx_ai_mode", mode);
+      renderAi();
+    }
+
+    function aiModeTitle() {
+      if (aiMode === "contract") return "合约地址分析";
+      if (aiMode === "news") return "币圈大事件解读";
+      if (aiMode === "deep") return "AI深度研判";
+      if (aiMode === "strategy") return "AI策略点位";
+      return "行情问答助手";
+    }
+
+    function aiPlaceholder() {
+      if (aiMode === "contract") return "请输入合约地址，例如：0x205f39c39f5fe15d4ef000aeb835de8deb264444";
+      if (aiMode === "news") return "请输入你看到的新闻、公告或事件，例如：美联储利率决议、ETF资金流、币安公告、项目上线消息。";
+      if (aiMode === "deep") return "请输入需要深度研判的内容，例如：综合分析 BTC/ETH/SOL 今天的强弱、风险和短线节奏。";
+      if (aiMode === "strategy") return "请输入想要策略的币种或直接点击分析，例如：给我 BTC 30秒/60秒看涨看跌点位。";
+      return "请输入问题，例如：BTC 现在适合看涨还是看跌？ETH 和 SOL 哪个更强？";
+    }
+
+    function aiExampleText() {
+      if (aiMode === "contract") return "0x205f39c39f5fe15d4ef000aeb835de8deb264444";
+      if (aiMode === "news") return "今天市场关注 BTC ETF 资金流、美联储利率预期、币安新币公告，请解读这些事件对 BTC/ETH/SOL 的影响。";
+      if (aiMode === "deep") return "请对 BTC、ETH、BNB、SOL、DOGE 做一个短线强弱对比，给出风险等级、观察点和不追高原则。";
+      if (aiMode === "strategy") return "请给出当前所选币种的娱乐挑战策略：多少点位偏看涨、多少点位偏看跌、无效位和适合时间。";
+      return "BTC、ETH、BNB、SOL、DOGE 里面，接下来短线哪个更强？请用风险提示的方式分析。";
+    }
+
+    function renderAi() {
+      ["Chat", "Contract", "News", "Deep", "Strategy"].forEach(name => {
+        const key = name.toLowerCase();
+        const btn = $("aiTab" + name);
+        if (btn) btn.classList.toggle("active", aiMode === key);
+      });
+
+      const q = $("aiQuestion");
+      if (q) q.placeholder = aiPlaceholder();
+
+      if ($("aiExamples")) {
+        $("aiExamples").innerHTML =
+          `当前模式：${aiModeTitle()}<br>` +
+          `每次分析消耗 ${AI_COST} 金币。未接AI后端时会显示演示分析。`;
+      }
+
+      if ($("aiUsedText")) $("aiUsedText").textContent = aiUsed + "次";
+
+      const records = getAiRecords();
+      if ($("aiRecords")) {
+        $("aiRecords").innerHTML = records.length
+          ? records.map(r => `<div class="ai-record">🤖 ${r.time}<br>模式：${r.mode}<br>问题：${r.q}<br>消耗：${AI_COST} 金币</div>`).join("")
+          : '<div class="ai-record">暂无AI使用记录。</div>';
+      }
+    }
+
+    function fillAiExample() {
+      if ($("aiQuestion")) $("aiQuestion").value = aiExampleText();
+      $("result").textContent = "已填入示例，可以直接点击“消耗金币并分析”。";
+    }
+
+    function sanitizeShort(text, max = 260) {
+      return String(text || "").replace(/\s+/g, " ").trim().slice(0, max);
+    }
+
+    function marketSnapshot() {
+      const info = symbolInfo ? symbolInfo() : { pair: "BTC/USDT", name: "BTC" };
+      const price = currentPrice ? "$" + fmt(currentPrice) : "行情读取中";
+      const data = Array.isArray(chartPrices) ? chartPrices.slice(-10) : [];
+      let trend = "数据不足";
+      let strength = "中性";
+      let high = "--";
+      let low = "--";
+
+      if (data.length >= 3) {
+        high = "$" + fmt(Math.max(...data));
+        low = "$" + fmt(Math.min(...data));
+        const first = data[0];
+        const last = data[data.length - 1];
+        const pct = ((last - first) / first) * 100;
+        trend = pct > 0.03 ? "短线偏强" : pct < -0.03 ? "短线偏弱" : "震荡整理";
+        strength = pct > 0.08 ? "强势" : pct < -0.08 ? "弱势" : "中性";
+      }
+
+      return { pair: info.pair, name: info.name, price, trend, strength, high, low };
+    }
+
+    function contractHeuristic(input) {
+      const text = input.trim();
+      const isEvm = /^0x[a-fA-F0-9]{40}$/.test(text);
+      const isTron = /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(text);
+
+      let chain = "暂无法判断";
+      let baseRisk = 75;
+      if (isEvm) {
+        chain = "可能是 EVM 链地址，例如 Ethereum / BSC / Polygon / Arbitrum 等";
+        baseRisk = 65;
+      }
+      if (isTron) {
+        chain = "可能是 TRON / TRC20 地址";
+        baseRisk = 68;
+      }
+      if (!isEvm && !isTron) baseRisk = 88;
+
+      return (
+`【合约深度分析 · 演示版】
+
+一、基础识别
+地址：${text || "未输入"}
+链路判断：${chain}
+格式评分：${isEvm || isTron ? "通过基础格式检查" : "未通过常见链地址格式检查"}
+
+二、风险评分
+综合风险：${baseRisk}/100
+风险等级：${baseRisk >= 80 ? "高风险" : baseRisk >= 60 ? "中高风险" : "中等风险"}
+
+三、必须检查的关键项
+1. 流动性：是否有真实交易池，池子是否锁定，是否可被撤池。
+2. 买卖税：是否存在高税、动态税、只涨不让卖等机制。
+3. 权限风险：是否有黑名单、暂停交易、限制转账、任意增发、修改税率权限。
+4. 持币集中度：前10地址占比是否过高，项目方钱包是否持续转出。
+5. 合约开源：是否在 BscScan / Etherscan 开源验证。
+6. 交易活跃度：是否只有少量机器人交易，是否存在刷量。
+
+四、观察结论
+当前前端未接 GoPlus / DexScreener / BscScan / Etherscan，所以不能给出最终安全结论。
+如果这是小币或新币，默认按“中高风险”处理，先看流动性、权限和持币集中度。
+
+五、操作建议
+- 不建议只凭名字或短线涨幅买入。
+- 必须先查是否能正常卖出。
+- 小额测试优先，不要一次性重仓。
+- 如果合约未开源、流动性很低、持币集中，建议直接放弃。`);
+    }
+
+    function newsHeuristic(input) {
+      const snap = marketSnapshot();
+      return (
+`【币圈大事件深度解读 · 演示版】
+
+事件内容：
+${input || "未输入事件内容"}
+
+一、当前市场参考
+关注币种：${snap.pair}
+当前价格：${snap.price}
+短线状态：${snap.trend}
+最近高点：${snap.high}
+最近低点：${snap.low}
+
+二、事件影响矩阵
+1. BTC ETF / 机构资金流
+影响方向：偏中长期
+利好时通常先影响 BTC，再扩散到 ETH 和主流山寨。
+如果资金流出，市场风险偏好会下降。
+
+2. 美联储 / CPI / 利率预期
+影响方向：全市场
+降息预期增强通常利好风险资产。
+利率维持高位或美元走强，容易压制币圈反弹。
+
+3. 币安 / Coinbase / OKX 公告
+影响方向：短线波动强
+上币、合约上线、Launchpool 通常带来短线热度。
+但公告后追高容易遇到回落。
+
+4. 项目解锁 / 大户转账
+影响方向：偏风险
+大额解锁、项目方转入交易所，可能形成抛压。
+
+三、对主流币影响
+BTC：更受宏观和ETF资金影响。
+ETH：更受生态、ETF、质押和链上费用影响。
+SOL：更受生态热度、MEME活跃度和链上交易量影响。
+BNB：更受币安生态和Launchpool影响。
+DOGE：更受市场情绪和社交热点影响。
+
+四、结论
+如果事件是宏观利好，优先观察 BTC 和 ETH。
+如果事件是交易所上币或生态热点，SOL / BNB / DOGE 波动可能更大。
+不建议只凭新闻追高，最好等价格回踩和成交量确认。`);
+    }
+
+    function chatHeuristic(input) {
+      const snap = marketSnapshot();
+      return (
+`【AI行情问答 · 深度演示回答】
+
+你的问题：
+${input || "未输入问题"}
+
+一、当前行情
+关注币种：${snap.pair}
+当前价格：${snap.price}
+短线状态：${snap.trend}
+强弱判断：${snap.strength}
+最近高点：${snap.high}
+最近低点：${snap.low}
+
+二、短线判断框架
+1. 如果价格连续刷新高点，说明短线买盘较强，但要防止追高。
+2. 如果价格在高点附近横盘，说明多空争夺，适合等方向确认。
+3. 如果价格跌破短线低点，说明弱势加重，猜涨胜率下降。
+4. 10秒/15秒更偏娱乐，30秒/60秒更适合观察趋势。
+5. 如果波动低于0.01%，系统会按震荡局处理。
+
+三、风险提醒
+- 短线涨跌存在随机性，不要连续重仓单边。
+- AI只做信息整理，不保证正确。
+- 任何行情判断都要结合成交量、资金费率、新闻和BTC方向。
+
+四、结论
+当前更适合用“小额、多次、观察趋势”的方式体验。
+如果你要玩60秒模式，建议先看行情图方向，不要在急涨急跌后马上追单。`);
+    }
+
+    function deepHeuristic(input) {
+      const snap = marketSnapshot();
+      return (
+`【AI深度研判 · 综合版】
+
+研判内容：
+${input || "未输入研判内容"}
+
+一、市场状态
+当前观察：${snap.pair}
+当前价格：${snap.price}
+短线趋势：${snap.trend}
+强弱状态：${snap.strength}
+最近区间：${snap.low} ~ ${snap.high}
+
+二、主流币强弱逻辑
+BTC：市场方向锚，BTC弱时大多数币胜率下降。
+ETH：偏稳健，适合观察是否跟随BTC放量。
+BNB：受币安生态、Launchpool、平台消息影响更明显。
+SOL：弹性较大，强势时涨得快，弱势时回撤也快。
+DOGE：情绪属性强，适合看热点，不适合重仓判断。
+
+三、短线玩法建议
+10秒：随机性较高，适合娱乐体验。
+15秒：节奏较好，适合普通用户。
+30秒：更适合观察价格是否延续。
+60秒：更接近趋势判断，但不要在大幅拉升后追高。
+
+四、风险等级
+行情风险：中
+追高风险：中高
+小币合约风险：高
+AI误判风险：存在
+
+五、执行原则
+1. 先看BTC方向，再看具体币种。
+2. 不在刚暴涨后马上看涨。
+3. 不在刚暴跌后盲目抄底。
+4. 连错2次建议暂停。
+5. 金币仅用于娱乐体验，不要把它当投资收益。
+
+六、最终结论
+当前版本适合做“行情学习 + 娱乐挑战 + 社群引流”。
+如果要提升真实分析能力，下一步需要接入AI后端、新闻源、链上安全接口和DexScreener价格流动性数据。`);
+    }
+
+
+    function calcStrategyLevels() {
+      const snap = marketSnapshot();
+      const priceNum = currentPrice || realPrice || displayPrice || 0;
+      const data = Array.isArray(chartPrices) ? chartPrices.slice(-20) : [];
+      let high = priceNum;
+      let low = priceNum;
+      let rangePct = 0.0012;
+
+      if (data.length >= 4) {
+        high = Math.max(...data);
+        low = Math.min(...data);
+        rangePct = Math.max((high - low) / priceNum, 0.0008);
+      }
+
+      const vol = Math.min(Math.max(rangePct, 0.0008), 0.006);
+      const upTrigger = priceNum * (1 + vol * 0.28);
+      const downTrigger = priceNum * (1 - vol * 0.28);
+      const upInvalid = priceNum * (1 - vol * 0.42);
+      const downInvalid = priceNum * (1 + vol * 0.42);
+      const upTake = priceNum * (1 + vol * 0.58);
+      const downTake = priceNum * (1 - vol * 0.58);
+
+      let bias = "震荡";
+      if (data.length >= 5) {
+        const first = data[0];
+        const last = data[data.length - 1];
+        const pct = (last - first) / first;
+        if (pct > 0.00035) bias = "偏多";
+        if (pct < -0.00035) bias = "偏空";
+      }
+
+      return {
+        snap,
+        priceNum,
+        high,
+        low,
+        vol,
+        bias,
+        upTrigger,
+        downTrigger,
+        upInvalid,
+        downInvalid,
+        upTake,
+        downTake
+      };
+    }
+
+    function strategyHeuristic(input) {
+      const s = calcStrategyLevels();
+      const fmtP = (v) => "$" + fmt(v);
+
+      return (
+`【AI策略点位 · 娱乐挑战版】
+
+重要说明：
+以下点位只用于 UpDownX 游戏娱乐体验，不是投资建议，不适合用于真实合约交易。
+
+一、当前基础数据
+币种：${s.snap.pair}
+当前动态价：${fmtP(s.priceNum)}
+短线状态：${s.snap.trend}
+短线倾向：${s.bias}
+最近区间：${fmtP(s.low)} ~ ${fmtP(s.high)}
+
+二、看涨观察策略
+触发点位：价格站上 ${fmtP(s.upTrigger)} 后，短线偏看涨
+参考目标：${fmtP(s.upTake)}
+无效点位：跌回 ${fmtP(s.upInvalid)} 下方，看涨策略失效
+适合玩法：30秒 / 60秒
+使用原则：不要在瞬间急拉后马上追涨，最好等回踩不破再看涨。
+
+三、看跌观察策略
+触发点位：价格跌破 ${fmtP(s.downTrigger)} 后，短线偏看跌
+参考目标：${fmtP(s.downTake)}
+无效点位：重新站上 ${fmtP(s.downInvalid)}，看跌策略失效
+适合玩法：30秒 / 60秒
+使用原则：不要在连续急跌后马上追跌，容易出现反抽。
+
+四、震荡处理
+如果价格在 ${fmtP(s.downTrigger)} ~ ${fmtP(s.upTrigger)} 中间来回波动，属于震荡区。
+震荡区不建议强行判断方向，容易触发震荡局或随机输赢。
+
+五、执行建议
+1. 10秒/15秒随机性更强，只适合娱乐。
+2. 30秒/60秒更适合按照点位策略。
+3. 连续错2次建议暂停。
+4. 遇到快速插针、价格跳动异常，不要继续追单。
+5. 金币仅用于娱乐体验，不可提现，不承诺收益。
+
+六、你的输入
+${input || "未输入额外要求，已按当前所选币种自动生成策略。"}`);
+    }
+
+    function demoAiAnswer(question) {
+      if (aiMode === "contract") return contractHeuristic(question);
+      if (aiMode === "news") return newsHeuristic(question);
+      if (aiMode === "deep") return deepHeuristic(question);
+      if (aiMode === "strategy") return strategyHeuristic(question);
+      return chatHeuristic(question);
+    }
+
+    async function callAiBackend(question) {
+      if (!AI_API) return null;
+
+      const payload = {
+        brand: BRAND_NAME,
+        mode: aiMode,
+        question,
+        userId,
+        inviteCode,
+        symbol: selectedSymbol,
+        price: currentPrice,
+        page: location.href
+      };
+
+      const res = await fetch(AI_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error("AI backend failed");
+      const data = await res.json();
+      return data.answer || data.text || "AI后端已返回，但没有 answer 字段。";
+    }
+
+    async function askAi() {
+      const question = sanitizeShort($("aiQuestion") ? $("aiQuestion").value : "", 800);
+
+      if (!question) {
+        $("result").textContent = "请先输入问题、合约地址或事件内容。";
+        return;
+      }
+
+      if (coins < AI_COST) {
+        $("result").innerHTML = `金币不足。AI分析每次需要 ${AI_COST} 金币，请先签到、做任务或充值金币。`;
+        return;
+      }
+
+      coins -= AI_COST;
+      aiUsed += 1;
+      localStorage.setItem("updownx_ai_used", String(aiUsed));
+      save();
+      render();
+
+      $("aiAnswer").textContent = "AI正在分析中...";
+      $("result").innerHTML = `已消耗 ${AI_COST} 金币，正在生成 ${aiModeTitle()}。`;
+
+      let answer = "";
+      try {
+        const backendAnswer = await callAiBackend(question);
+        answer = backendAnswer || demoAiAnswer(question);
+      } catch (err) {
+        answer = demoAiAnswer(question) + "\n\n提示：AI后端接口调用失败，已显示演示分析。";
+      }
+
+      $("aiAnswer").textContent = answer;
+
+      const records = getAiRecords();
+      records.unshift({
+        time: new Date().toLocaleString("zh-CN", { hour12: false }),
+        mode: aiModeTitle(),
+        q: sanitizeShort(question, 120)
+      });
+      setAiRecords(records);
+
+      render();
+    }
+
+    function randomCode(prefix, len = 6) {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let out = prefix;
+      for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+      return out;
+    }
+
+    function initUserIdentity() {
+      if (!userId) {
+        userId = "UDX-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 900 + 100);
+        localStorage.setItem("updownx_user_id", userId);
+      }
+      if (!inviteCode) {
+        inviteCode = randomCode("X", 6);
+        localStorage.setItem("updownx_invite_code", inviteCode);
+      }
+
+      const params = new URLSearchParams(location.search);
+      const ref = (params.get("ref") || "").trim().toUpperCase();
+      if (ref && ref !== inviteCode && !invitedBy) {
+        invitedBy = ref;
+        localStorage.setItem("updownx_invited_by", invitedBy);
+        coins += INVITE_REWARD;
+        save();
+        setTimeout(() => {
+          if ($("result")) $("result").innerHTML = `🎁 邀请奖励到账：你通过邀请码 ${ref} 进入，获得 ${INVITE_REWARD} 金币体验奖励。`;
+        }, 300);
+      }
+    }
+
+    function inviteLink() {
+      const base = location.origin + location.pathname;
+      return base + "?ref=" + encodeURIComponent(inviteCode);
+    }
+
+    function copyInviteLink() {
+      const text = `我在玩 UpDownX 多币种涨跌挑战平台，实时行情、多币种挑战，来试试：\n${inviteLink()}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          $("result").textContent = "邀请链接已复制，发到 Telegram / X / 群里即可。";
+        });
+      } else {
+        $("result").textContent = "复制失败，请手动复制邀请链接。";
+      }
+    }
+
+    function claimInviteReward() {
+      const claimable = Math.max(0, inviteCount * INVITE_REWARD - inviteRewardClaimed);
+      if (claimable <= 0) {
+        $("result").textContent = "暂无可领取的邀请奖励。静态版可生成邀请链接；真实邀请统计需要后端数据库。";
+        return;
+      }
+      coins += claimable;
+      inviteRewardClaimed += claimable;
+      localStorage.setItem("updownx_invite_reward_claimed", String(inviteRewardClaimed));
+      save();
+      render();
+      $("result").innerHTML = `✅ 邀请奖励领取成功：+${claimable} 金币。`;
+    }
+
+    function renderUserIdentity() {
+      if ($("userIdText")) $("userIdText").textContent = userId;
+      if ($("inviteCodeText")) $("inviteCodeText").textContent = inviteCode;
+      if ($("inviteCountText")) $("inviteCountText").textContent = inviteCount;
+      if ($("inviteRewardText")) {
+        const claimable = Math.max(0, inviteCount * INVITE_REWARD - inviteRewardClaimed);
+        $("inviteRewardText").textContent = claimable + " 金币";
+      }
+      if ($("inviteLinkText")) $("inviteLinkText").textContent = inviteLink();
+      if ($("inviteRankText")) {
+        $("inviteRankText").innerHTML =
+          `邀请规则：每个有效邀请奖励 ${INVITE_REWARD} 金币。<br>` +
+          `说明：当前 GitHub Pages 静态版可生成邀请链接和本地记录，真实邀请统计需要后端数据库。`;
+      }
+    }
+
+    function symbolVolatility() {
+      const name = symbolInfo().name;
+      if (name === "BTC") return 0.000035;
+      if (name === "ETH") return 0.000045;
+      if (name === "BNB") return 0.000055;
+      if (name === "SOL") return 0.000085;
+      if (name === "DOGE") return 0.00012;
+      return 0.00005;
+    }
+
+    function updateDisplayedPrice(price, isReal = false) {
+      if (!Number.isFinite(price) || price <= 0) return;
+
+      const priceEl = $("price");
+      if (!priceEl) return;
+
+      lastDisplayPrice = displayPrice || price;
+      displayPrice = price;
+      priceEl.textContent = "$" + fmt(displayPrice);
+
+      priceEl.classList.remove("flash-up", "flash-down");
+      if (displayPrice > lastDisplayPrice) priceEl.classList.add("flash-up");
+      if (displayPrice < lastDisplayPrice) priceEl.classList.add("flash-down");
+
+      if (!isReal) {
+        chartTick += 1;
+        if (chartTick % 3 === 0) addChartPrice(displayPrice, true);
+      }
+    }
+
+    function startDynamicPrice() {
+      if (dynamicTimer) clearInterval(dynamicTimer);
+
+      dynamicTimer = setInterval(() => {
+        if (!realPrice || playing) return;
+
+        const drift = (Math.random() - 0.5) * 2 * symbolVolatility();
+        const target = realPrice * (1 + drift);
+        const smoothed = (displayPrice || realPrice) * 0.72 + target * 0.28;
+        updateDisplayedPrice(smoothed, false);
+      }, 500);
+    }
+
+    function saveChartPrices() {
+      localStorage.setItem("chartPrices_" + selectedSymbol, JSON.stringify(chartPrices.slice(-30)));
+    }
+
+    function addChartPrice(price, visualOnly = false) {
+      if (!Number.isFinite(price) || price <= 0) return;
+      chartPrices.push(price);
+      chartPrices = chartPrices.slice(-30);
+      if (!visualOnly) saveChartPrices();
+      drawChart();
+    }
+
+    function drawChart() {
+      const canvas = $("priceChart");
+      if (!canvas) return;
+
+      const wrap = canvas.parentElement;
+      const dpr = window.devicePixelRatio || 1;
+      const width = wrap.clientWidth || 320;
+      const height = wrap.clientHeight || 190;
+
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      const data = chartPrices.slice(-30);
+      if (data.length < 2) {
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = "13px Arial";
+        ctx.fillText("正在加载行情图...", 16, 28);
+        return;
+      }
+
+      const high = Math.max(...data);
+      const low = Math.min(...data);
+      const pad = Math.max((high - low) * 0.12, high * 0.00005);
+      const max = high + pad;
+      const min = low - pad;
+
+      if ($("chartHigh")) $("chartHigh").textContent = "$" + fmt(high);
+      if ($("chartLow")) $("chartLow").textContent = "$" + fmt(low);
+
+      const xOf = (i) => 12 + i * ((width - 24) / (data.length - 1));
+      const yOf = (v) => 12 + (max - v) * ((height - 24) / (max - min || 1));
+      const rising = data[data.length - 1] >= data[0];
+
+      const grad = ctx.createLinearGradient(0, 0, 0, height);
+      grad.addColorStop(0, rising ? "rgba(35,209,139,0.28)" : "rgba(244,63,94,0.28)");
+      grad.addColorStop(1, "rgba(255,255,255,0.02)");
+
+      ctx.beginPath();
+      data.forEach((v, i) => {
+        const x = xOf(i);
+        const y = yOf(v);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(xOf(data.length - 1), height - 12);
+      ctx.lineTo(xOf(0), height - 12);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      data.forEach((v, i) => {
+        const x = xOf(i);
+        const y = yOf(v);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = rising ? "#23d18b" : "#f43f5e";
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+
+      const lx = xOf(data.length - 1);
+      const ly = yOf(data[data.length - 1]);
+      ctx.beginPath();
+      ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,0.68)";
+      ctx.font = "11px Arial";
+      ctx.fillText("$" + fmt(high), 12, 17);
+      ctx.fillText("$" + fmt(low), 12, height - 10);
+    }
+
+    function updateSymbolUi() {
+      Object.keys(SYMBOLS).forEach(sym => {
+        const btn = $("coin" + sym);
+        if (btn) btn.classList.toggle("active", sym === selectedSymbol);
+      });
+      if ($("pairBadge")) $("pairBadge").textContent = symbolInfo().pair.replace("/", " / ");
+      if ($("coinName")) $("coinName").textContent = symbolInfo().name;
+      if ($("chartPairTitle")) $("chartPairTitle").textContent = symbolInfo().pair;
+    }
+
+    function setSymbol(symbol) {
+      if (playing) {
+        $("result").textContent = "本局正在进行中，开奖后才能切换币种。";
+        return;
+      }
+      if (!SYMBOLS[symbol]) return;
+      selectedSymbol = symbol;
+      localStorage.setItem("selectedSymbol", selectedSymbol);
+      chartPrices = JSON.parse(localStorage.getItem("chartPrices_" + selectedSymbol) || "[]");
+      currentPrice = 0;
+      realPrice = 0;
+      displayPrice = 0;
+      lastDisplayPrice = 0;
+      $("price").textContent = "加载中...";
+      $("change").textContent = "正在读取行情...";
+      if ($("chartHigh")) $("chartHigh").textContent = "--";
+      if ($("chartLow")) $("chartLow").textContent = "--";
+      $("result").innerHTML = `已切换到 ${symbolInfo().pair}。请选择开奖时间后开始。`;
+      updateSymbolUi();
+      drawChart();
+      getPrice();
+    }
+
+    async function getRealPrice() {
+      const res = await fetch(currentApi(), { cache: "no-store" });
+      if (!res.ok) throw new Error("行情接口异常");
+      const data = await res.json();
+      return {
+        price: Number(data.lastPrice),
+        pct: Number(data.priceChangePercent)
+      };
+    }
+
+    async function getPrice() {
+      const market = await getRealPrice();
+      realPrice = market.price;
+      currentPrice = market.price;
+      if (!displayPrice) displayPrice = realPrice;
+      updateDisplayedPrice(realPrice, true);
+      addChartPrice(realPrice, false);
+
+      $("change").innerHTML =
+        `24小时涨跌幅：<span class="${market.pct >= 0 ? "green" : "red"}">${market.pct >= 0 ? "+" : ""}${market.pct.toFixed(2)}%</span>`;
+
+      return realPrice;
+    }
+
+    async function updateMarket() {
+      try {
+        await getPrice();
+      } catch (err) {
+        $("price").textContent = "行情失败";
+        $("change").textContent = "请检查网络，或稍后刷新页面。";
+      }
+    }
+
+    function setButtons(disabled) {
+      $("btnUp").disabled = disabled;
+      $("btnDown").disabled = disabled;
+    }
+
+    function setDuration(sec) {
+      if (playing) {
+        $("result").textContent = "本局正在进行中，开奖后才能切换时间。";
+        return;
+      }
+      selectedDuration = sec;
+      localStorage.setItem("selectedDuration", String(sec));
+      $("result").innerHTML =
+        `已选择 ${sec} 秒开奖。<br>点击看涨/看跌后才会锁定开局价格并开始倒计时。`;
+      render();
+    }
+
+    async function play(choice) {
+      if (playing) return;
+
+      if (coins < ROUND_COST) {
+        $("result").innerHTML = "金币不足。请先签到、做任务、人工充值或重新开始。";
+        return;
+      }
+
+      playing = true;
+      setButtons(true);
+
+      // 点击后立即扣除本局成本，并锁定价格
+      coins = Math.max(0, coins - ROUND_COST);
+      save();
+      render();
+
+      $("result").textContent = "正在锁定开局价格...";
+      $("countdown").textContent = "";
+
+      try {
+        startPrice = await getPrice();
+        $("result").innerHTML =
+          `币种：${symbolInfo().pair}<br>` +
+          `开局价格：$${fmt(startPrice)}<br>` +
+          `你选择了：${choice === "up" ? "看涨" : "看跌"}<br>` +
+          `本局时间：${selectedDuration} 秒，本局成本：${ROUND_COST} 金币。`;
+
+        for (let i = selectedDuration; i >= 1; i--) {
+          $("countdown").textContent = i;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+
+        $("countdown").textContent = "开奖";
+        const endPrice = await getPrice();
+        const diff = endPrice - startPrice;
+        const pctMove = Math.abs(diff) / startPrice;
+        const real = endPrice > startPrice ? "up" : "down";
+
+        rounds += 1;
+        totalRounds += 1;
+
+        if (pctMove < FLAT_THRESHOLD) {
+          // 震荡局：退还本局成本，不算连胜
+          coins += ROUND_COST;
+          $("result").innerHTML =
+            `➖ 震荡局，退还本局成本。<br>` +
+            `币种：${symbolInfo().pair}<br>` +
+            `开局：$${fmt(startPrice)} → 开奖：$${fmt(endPrice)}<br>` +
+            `波动小于 0.01%，本局不计输赢。`;
+        } else if (real === choice) {
+          const reward = REWARD_MAP[selectedDuration] || 15;
+          coins += ROUND_COST + reward;
+          streak += 1;
+          $("result").innerHTML =
+            `✅ 猜对了！<br>` +
+            `币种：${symbolInfo().pair}<br>` +
+            `开局：$${fmt(startPrice)} → 开奖：$${fmt(endPrice)}<br>` +
+            `返还成本 ${ROUND_COST} 金币，奖励 +${reward} 金币，当前连胜 ${streak}。`;
+        } else {
+          streak = 0;
+          $("result").innerHTML =
+            `❌ 猜错了。<br>` +
+            `币种：${symbolInfo().pair}<br>` +
+            `开局：$${fmt(startPrice)} → 开奖：$${fmt(endPrice)}<br>` +
+            `扣除本局成本 ${ROUND_COST} 金币，连胜清零。`;
+        }
+
+        save();
+        render();
+      } catch (err) {
+        // 读取失败退回成本
+        coins += ROUND_COST;
+        save();
+        render();
+        $("result").textContent = "行情读取失败，已退回本局成本。可能是网络限制，刷新页面或稍后再试。";
+      } finally {
+        playing = false;
+        setButtons(false);
+        setTimeout(() => { if (!playing) $("countdown").textContent = ""; }, 1200);
+      }
+    }
+
+    function dailySign() {
+      if (localStorage.getItem("lastSignDate") === todayKey()) {
+        $("result").textContent = "今天已经签到过了，明天再来。";
+        render();
+        return;
+      }
+      coins += 50;
+      localStorage.setItem("lastSignDate", todayKey());
+      $("result").innerHTML = "🎁 签到成功！获得 +50 金币。";
+      save();
+      render();
+    }
+
+    function claimTask(key, reward) {
+      if (localStorage.getItem("task_" + key) === "done") {
+        $("result").textContent = "这个任务奖励已经领取过了。";
+        render();
+        return;
+      }
+
+      if (key === "tg") window.open(TELEGRAM_LINK, "_blank");
+      if (key === "x") window.open(X_LINK, "_blank");
+
+      coins += reward;
+      localStorage.setItem("task_" + key, "done");
+      $("result").innerHTML = `🎉 任务完成！奖励 +${reward} 金币。`;
+      save();
+      render();
+    }
+
+    function shareAndClaim() {
+      shareGame();
+      if (localStorage.getItem("task_share") !== "done") {
+        coins += 100;
+        localStorage.setItem("task_share", "done");
+        $("result").innerHTML = "🚀 分享奖励已发放：+100 金币。";
+        save();
+        render();
+      }
+    }
+
+    function getPayAddress(chain = selectedPayChain) {
+      return chain === "BEP20" ? USDT_BEP20_ADDRESS : USDT_TRC20_ADDRESS;
+    }
+
+    function setPayChain(chain) {
+      if (chain !== "TRC20" && chain !== "BEP20") return;
+      selectedPayChain = chain;
+      localStorage.setItem("selectedPayChain", chain);
+      $("result").innerHTML = `已选择充值链路：USDT-${chain}。请务必按所选链路转账。`;
+      render();
+    }
+
+    function createOrder(name, addCoins, price) {
+      const agree = $("rechargeAgreement");
+      if (!agree || !agree.checked) {
+        $("result").innerHTML = "请先勾选充值协议：金币不可提现、不可兑换现金、请核对链路。";
+        return;
+      }
+
+      const id = "CZ" + Date.now().toString().slice(-9);
+      const time = new Date().toLocaleString("zh-CN", { hour12: false });
+      const chain = selectedPayChain;
+      const address = getPayAddress(chain);
+      const order = { id, userId, inviteCode, name, coins: addCoins, price, chain, address, time, status: "待付款 / 待人工确认" };
+
+      const records = getOrders();
+      records.unshift(order);
+      setOrders(records);
+
+      currentOrderText =
+        `用户ID：${userId}\n` +
+        `邀请码：${inviteCode}\n` +
+        `订单号：${id}\n` +
+        `充值链路：USDT-${chain}\n` +
+        `套餐：${name}\n` +
+        `金额：${price} USDT\n` +
+        `金币：${addCoins}\n` +
+        `状态：待付款 / 待人工确认\n` +
+        `收款地址：${address}\n` +
+        `注意：请使用 USDT-${chain} 转账，转错链路可能无法找回。金币仅用于娱乐体验，不可提现。`;
+
+      currentSupportText =
+        `客服你好，我已提交充值订单，请帮我确认到账。\n` +
+        `用户ID：${userId}\n` +
+        `邀请码：${inviteCode}\n` +
+        `订单号：${id}\n` +
+        `充值链路：USDT-${chain}\n` +
+        `套餐：${name}\n` +
+        `金额：${price} USDT\n` +
+        `应加金币：${addCoins}\n` +
+        `我将发送付款截图，请人工确认。\n` +
+        `页面链接：${location.href}`;
+
+      $("currentOrderBox").style.display = "block";
+      $("orderInfo").innerHTML =
+        `用户ID：${userId}<br>` +
+        `邀请码：${inviteCode}<br>` +
+        `订单号：${id}<br>` +
+        `充值链路：USDT-${chain}<br>` +
+        `套餐：${name}<br>` +
+        `金额：${price} USDT<br>` +
+        `金币：${addCoins}<br>` +
+        `状态：待付款 / 待人工确认`;
+      $("payAddressTitle").textContent = `USDT-${chain} 地址：`;
+      $("payAddress").textContent = address;
+      $("supportMessageBox").textContent = currentSupportText;
+
+      $("result").innerHTML =
+        `🧾 已生成订单：${id}<br>` +
+        `请使用 USDT-${chain} 转账。<br>` +
+        `付款后点击“一键打开 Telegram 提交订单”，发送订单信息和付款截图。`;
+      render();
+    }
+
+    function copyPayInfo() {
+      if (!currentOrderText) {
+        $("result").textContent = "请先生成订单。";
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(currentOrderText).then(() => {
+          $("result").textContent = "订单号、链路、金额和收款地址已复制。";
+        });
+      } else {
+        $("result").textContent = "复制失败，请手动复制订单信息。";
+      }
+    }
+
+    function copySupportMessage() {
+      if (!currentSupportText) {
+        $("result").textContent = "请先生成订单。";
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(currentSupportText).then(() => {
+          $("result").textContent = "客服提交信息已复制，打开 Telegram 客服后粘贴并发送截图。";
+        });
+      } else {
+        $("result").textContent = "复制失败，请手动复制客服提交信息。";
+      }
+    }
+
+    function contactSupport() {
+      window.open(SUPPORT_LINK, "_blank");
+    }
+
+    function telegramShareUrl(text) {
+      return "https://t.me/share/url?url=" + encodeURIComponent(location.href) +
+        "&text=" + encodeURIComponent(text);
+    }
+
+    function sendTelegramOrder() {
+      if (!currentSupportText) {
+        $("result").textContent = "请先生成充值订单。";
+        return;
+      }
+
+      const text =
+        currentSupportText +
+        "\n\n付款后请补充：\n1. 付款截图\n2. 交易哈希 TxID\n3. 付款钱包地址";
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          $("result").textContent = "订单信息已复制，正在打开 Telegram 客服。请粘贴信息并发送付款截图。";
+          setTimeout(() => window.open(SUPPORT_LINK, "_blank"), 400);
+        });
+      } else {
+        $("result").textContent = "正在打开 Telegram 客服，请手动复制订单信息。";
+        window.open(SUPPORT_LINK, "_blank");
+      }
+    }
+
+    async function notifyOrderBackend() {
+      if (!currentSupportText) {
+        $("result").textContent = "请先生成充值订单。";
+        return;
+      }
+
+      if (!ORDER_NOTIFY_API) {
+        $("result").innerHTML =
+          "当前未配置后端自动通知接口。<br>" +
+          "安全做法：复制客服提交信息 → 打开 Telegram 客服 → 发送订单和截图。";
+        return;
+      }
+
+      try {
+        const payload = {
+          brand: BRAND_NAME,
+          userId,
+          inviteCode,
+          orderText: currentSupportText,
+          page: location.href,
+          createdAt: new Date().toISOString()
+        };
+
+        const res = await fetch(ORDER_NOTIFY_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error("notify failed");
+
+        $("result").textContent = "订单已自动通知管理员 Telegram，请付款后发送截图确认。";
+      } catch (err) {
+        $("result").textContent = "后端通知失败。请使用“一键打开 Telegram 提交订单”。";
+      }
+    }
+
+
+    function markOrderCompleted(orderId, amount) {
+      if (!orderId) return;
+      const records = getOrders();
+      let changed = false;
+      const next = records.map(r => {
+        if (r.id === orderId) {
+          changed = true;
+          return { ...r, status: `已完成 / 已加 ${amount} 金币` };
+        }
+        return r;
+      });
+      if (changed) setOrders(next);
+    }
+
+    function adminAddCoins() {
+      const pass = $("adminPass").value.trim();
+      const orderId = $("adminOrderId") ? $("adminOrderId").value.trim() : "";
+      const amount = Number($("adminCoins").value || 0);
+
+      if (pass !== ADMIN_PASSWORD) {
+        $("result").textContent = "管理员密码错误。";
+        return;
+      }
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        $("result").textContent = "请输入正确的金币数量。";
+        return;
+      }
+
+      coins += amount;
+      totalRecharge += amount;
+      if (orderId) markOrderCompleted(orderId, amount);
+      $("result").innerHTML = orderId
+        ? `✅ 订单 ${orderId} 已确认到账，并加金币：+${amount}。用户ID请以订单记录为准。`
+        : `✅ 管理员加金币成功：+${amount} 金币。`;
+
+      closeAdmin();
+      save();
+      render();
+    }
+
+    function resetGame() {
+      coins = 100;
+      streak = 0;
+      rounds = 0;
+      save();
+      render();
+      $("result").textContent = "已重新开始。点击看涨或看跌开始下一局。";
+    }
+
+    function openRules() { $("rulesModal").style.display = "flex"; }
+    function closeRules() { $("rulesModal").style.display = "none"; }
+    function openManualRecharge() { $("manualRechargeModal").style.display = "flex"; }
+    function closeManualRecharge() { $("manualRechargeModal").style.display = "none"; }
+    function openAdmin() { $("adminModal").style.display = "flex"; }
+    function closeAdmin() { $("adminModal").style.display = "none"; }
+
+    function copyLink() {
+      const url = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          $("result").textContent = "链接已复制，可以发给朋友了。";
+        }).catch(() => {
+          $("result").textContent = "复制失败，请手动复制浏览器地址栏链接。";
+        });
+      } else {
+        $("result").textContent = "请手动复制浏览器地址栏链接。";
+      }
+    }
+
+    function shareGame() {
+      const url = window.location.href;
+      const text = "我在玩 UpDownX 多币种涨跌挑战平台，实时行情、多币种挑战，来试试：";
+      if (navigator.share) {
+        navigator.share({ title: "UpDownX", text, url });
+      } else {
+        copyLink();
+      }
+    }
+
+    initUserIdentity();
+    render();
+    renderUserIdentity();
+    renderAi();
+    refreshStrategy(false);
+    getPrice();
+  </script>
+</body>
+</html>
