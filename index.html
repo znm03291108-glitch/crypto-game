@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>币圈涨跌小游戏</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at top, #202947 0%, #070914 55%, #02030a 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .app {
+      width: 100%;
+      max-width: 430px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      backdrop-filter: blur(12px);
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .badge {
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .card {
+      background: rgba(0,0,0,0.25);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .label {
+      color: rgba(255,255,255,0.62);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .price {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    .sub {
+      color: rgba(255,255,255,0.66);
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat {
+      background: rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .stat strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .stat span {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    button {
+      border: 0;
+      border-radius: 18px;
+      padding: 17px 12px;
+      color: white;
+      font-weight: 900;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.08s, opacity 0.2s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .up { background: linear-gradient(135deg, #0ecb81, #0a9f68); }
+    .down { background: linear-gradient(135deg, #f6465d, #b82038); }
+    .reset { 
+      width: 100%;
+      background: rgba(255,255,255,0.12);
+      font-size: 15px;
+      padding: 13px;
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-top: 8px;
+    }
+    .result {
+      min-height: 54px;
+      background: rgba(0,0,0,0.24);
+      border-radius: 18px;
+      padding: 14px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.86);
+      margin-bottom: 12px;
+    }
+    .countdown {
+      font-size: 42px;
+      font-weight: 900;
+      text-align: center;
+      margin: 8px 0 16px;
+      min-height: 50px;
+    }
+    .small {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .green { color: #0ecb81; }
+    .red { color: #f6465d; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="top">
+      <div class="title">币圈涨跌<br/>小游戏</div>
+      <div class="badge">BTC / USDT</div>
+    </div>
+
+    <section class="card">
+      <div class="label">当前 BTC 价格</div>
+      <div id="price" class="price">加载中...</div>
+      <div id="change" class="sub">读取 Binance 公共行情</div>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><strong id="coins">100</strong><span>金币</span></div>
+      <div class="stat"><strong id="streak">0</strong><span>连胜</span></div>
+      <div class="stat"><strong id="rounds">0</strong><span>局数</span></div>
+    </section>
+
+    <div id="countdown" class="countdown"></div>
+
+    <section class="buttons">
+      <button id="btnUp" class="up" onclick="play('up')">看涨</button>
+      <button id="btnDown" class="down" onclick="play('down')">看跌</button>
+    </section>
+
+    <div id="result" class="result">
+      玩法：点击“看涨”或“看跌”，5 秒后再次读取 BTC 价格。猜对 +10 金币，连胜有加成；猜错 -10 金币。
+    </div>
+
+    <button class="reset" onclick="resetGame()">重新开始</button>
+
+    <p class="small">
+      娱乐小游戏，不是真实交易，不构成投资建议。行情接口可能因地区网络限制而失败。
+    </p>
+  </main>
+
+  <script>
+    let startPrice = 0;
+    let currentPrice = 0;
+    let coins = Number(localStorage.getItem("coins") || 100);
+    let streak = Number(localStorage.getItem("streak") || 0);
+    let rounds = Number(localStorage.getItem("rounds") || 0);
+    let playing = false;
+
+    const API = "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT";
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function fmt(n) {
+      return Number(n).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function save() {
+      localStorage.setItem("coins", coins);
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("rounds", rounds);
+    }
+
+    function renderStats() {
+      $("coins").textContent = coins;
+      $("streak").textContent = streak;
+      $("rounds").textContent = rounds;
+    }
+
+    async function getPrice() {
+      try {
+        const res = await fetch(API, { cache: "no-store" });
+        if (!res.ok) throw new Error("行情接口异常");
+        const data = await res.json();
+        currentPrice = Number(data.lastPrice);
+        $("price").textContent = "$" + fmt(currentPrice);
+
+        const pct = Number(data.priceChangePercent);
+        $("change").innerHTML = `24小时涨跌幅：<span class="${pct >= 0 ? "green" : "red"}">${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%</span>`;
+        return currentPrice;
+      } catch (err) {
+        $("price").textContent = "行情失败";
+        $("change").textContent = "请检查网络，或稍后刷新页面。";
+        throw err;
+      }
+    }
+
+    function setButtons(disabled) {
+      $("btnUp").disabled = disabled;
+      $("btnDown").disabled = disabled;
+    }
+
+    async function play(choice) {
+      if (playing || coins <= 0) return;
+
+      playing = true;
+      setButtons(true);
+      $("result").textContent = "正在锁定开局价格...";
+      $("countdown").textContent = "";
+
+      try {
+        startPrice = await getPrice();
+        $("result").textContent = `开局价格：$${fmt(startPrice)}。你选择了：${choice === "up" ? "看涨" : "看跌"}。`;
+
+        for (let i = 5; i >= 1; i--) {
+          $("countdown").textContent = i;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+
+        $("countdown").textContent = "开奖";
+        const endPrice = await getPrice();
+        const real = endPrice >= startPrice ? "up" : "down";
+        const win = real === choice;
+
+        rounds += 1;
+
+        if (win) {
+          const reward = 10 + Math.min(streak * 2, 20);
+          coins += reward;
+          streak += 1;
+          $("result").innerHTML = `✅ 猜对了！<br>开局：$${fmt(startPrice)} → 开奖：$${fmt(endPrice)}<br>奖励 +${reward} 金币，当前连胜 ${streak}。`;
+        } else {
+          coins = Math.max(0, coins - 10);
+          streak = 0;
+          $("result").innerHTML = `❌ 猜错了。<br>开局：$${fmt(startPrice)} → 开奖：$${fmt(endPrice)}<br>扣除 10 金币，连胜清零。`;
+        }
+
+        save();
+        renderStats();
+      } catch (err) {
+        $("result").textContent = "行情读取失败，刷新页面或稍后再试。";
+      } finally {
+        playing = false;
+        setButtons(false);
+        setTimeout(() => {
+          if (!playing) $("countdown").textContent = "";
+        }, 1200);
+      }
+    }
+
+    function resetGame() {
+      coins = 100;
+      streak = 0;
+      rounds = 0;
+      save();
+      renderStats();
+      $("result").textContent = "已重新开始。点击看涨或看跌开始下一局。";
+    }
+
+    renderStats();
+    getPrice();
+  </script>
+</body>
+</html>
