@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>爆点逃跑游戏</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -12,42 +15,53 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #0f172a;
+      background: linear-gradient(180deg, #020617, #0f172a);
       color: #fff;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px;
+      padding: 18px;
     }
 
     .app {
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
+      margin: 0 auto;
       background: #111827;
-      border-radius: 20px;
+      border-radius: 22px;
       padding: 20px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      box-shadow: 0 0 30px rgba(0,0,0,0.45);
     }
 
     h1 {
       text-align: center;
-      margin: 10px 0 5px;
       font-size: 28px;
+      margin: 10px 0 6px;
     }
 
     .subtitle {
       text-align: center;
       color: #9ca3af;
       font-size: 14px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
+      line-height: 1.5;
     }
 
     .card {
       background: #1f2937;
       border-radius: 16px;
       padding: 16px;
-      margin-bottom: 15px;
+      margin-bottom: 14px;
+    }
+
+    .wallet-box {
+      text-align: center;
+    }
+
+    .wallet-status {
+      font-size: 14px;
+      color: #d1d5db;
+      line-height: 1.6;
+      word-break: break-all;
+      margin-top: 10px;
     }
 
     .balance {
@@ -58,18 +72,19 @@
 
     .number {
       text-align: center;
-      font-size: 56px;
+      font-size: 58px;
       font-weight: bold;
       color: #22c55e;
-      margin: 20px 0;
+      margin: 22px 0;
     }
 
     .status {
       text-align: center;
-      min-height: 28px;
+      min-height: 30px;
       color: #e5e7eb;
       font-size: 16px;
       margin-bottom: 15px;
+      line-height: 1.5;
     }
 
     input {
@@ -89,10 +104,15 @@
       padding: 15px;
       border: none;
       border-radius: 14px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
       margin-top: 12px;
       cursor: pointer;
+    }
+
+    .connect {
+      background: #38bdf8;
+      color: #082f49;
     }
 
     .start {
@@ -132,6 +152,7 @@
       border-radius: 10px;
       background: #374151;
       margin-bottom: 8px;
+      line-height: 1.5;
     }
 
     .win {
@@ -146,44 +167,79 @@
       text-align: center;
       font-size: 12px;
       color: #9ca3af;
-      line-height: 1.6;
+      line-height: 1.7;
       margin-top: 12px;
+    }
+
+    .locked {
+      opacity: 0.45;
+      pointer-events: none;
     }
   </style>
 </head>
+
 <body>
   <div class="app">
     <h1>爆点逃跑</h1>
-    <div class="subtitle">点数上涨前逃跑，逃早赢少，逃晚可能爆掉</div>
-
-    <div class="card balance">
-      <div>模拟余额</div>
-      <div><b id="balance">1000</b> 分</div>
+    <div class="subtitle">
+      持有平台币即可进入游戏<br>
+      点数上涨前逃跑，逃早赢少，逃晚可能爆掉
     </div>
 
-    <div class="card">
-      <div class="number" id="point">1.00x</div>
-      <div class="status" id="status">输入下注分数，点击开始</div>
-
-      <input id="bet" type="number" value="10" min="1" placeholder="输入下注分数" />
-
-      <button class="start" id="startBtn" onclick="startGame()">开始游戏</button>
-      <button class="cashout" id="cashoutBtn" onclick="cashOut()" disabled>立即逃跑</button>
-      <button class="reset" onclick="resetGame()">重置余额</button>
+    <div class="card wallet-box">
+      <button class="connect" onclick="connectWallet()">连接钱包 / 检测持币</button>
+      <div class="wallet-status" id="walletStatus">
+        请先连接 BSC 钱包
+      </div>
     </div>
 
-    <div class="card">
-      <div class="history-title">游戏记录</div>
-      <div class="history" id="history"></div>
+    <div id="gameArea" class="locked">
+      <div class="card balance">
+        <div>模拟余额</div>
+        <div><b id="balance">1000</b> 分</div>
+      </div>
+
+      <div class="card">
+        <div class="number" id="point">1.00x</div>
+        <div class="status" id="status">连接钱包并持有平台币后开始游戏</div>
+
+        <input id="bet" type="number" value="10" min="1" placeholder="输入下注分数" />
+
+        <button class="start" id="startBtn" onclick="startGame()">开始游戏</button>
+        <button class="cashout" id="cashoutBtn" onclick="cashOut()" disabled>立即逃跑</button>
+        <button class="reset" onclick="resetGame()">重置余额</button>
+      </div>
+
+      <div class="card">
+        <div class="history-title">游戏记录</div>
+        <div class="history" id="history"></div>
+      </div>
     </div>
 
     <div class="tips">
-      本页面为娱乐演示版，不涉及真实充值、提现或交易。<br>
-      建议先用这个简化版测试，稳定后再升级后台版本。
+      本页面为娱乐演示版。<br>
+      不涉及真实充值、提现、下注或链上转账。<br>
+      仅检测钱包是否持有指定平台币。
     </div>
   </div>
 
   <script>
+    const TOKEN_ADDRESS = "0x7aaaa5b10f97321345acd76945083141be1c5631";
+
+    // 最低持币数量，默认持有 1 个币即可玩
+    const MIN_TOKEN_AMOUNT = 1;
+
+    const BSC_CHAIN_ID = "0x38";
+
+    const ERC20_ABI = [
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+      "function symbol() view returns (string)"
+    ];
+
+    let walletConnected = false;
+    let allowedToPlay = false;
+
     let balance = 1000;
     let point = 1.00;
     let crashPoint = 0;
@@ -191,6 +247,8 @@
     let timer = null;
     let playing = false;
 
+    const walletStatusEl = document.getElementById("walletStatus");
+    const gameAreaEl = document.getElementById("gameArea");
     const balanceEl = document.getElementById("balance");
     const pointEl = document.getElementById("point");
     const statusEl = document.getElementById("status");
@@ -198,6 +256,99 @@
     const startBtn = document.getElementById("startBtn");
     const cashoutBtn = document.getElementById("cashoutBtn");
     const historyEl = document.getElementById("history");
+
+    async function connectWallet() {
+      try {
+        if (!window.ethereum) {
+          walletStatusEl.innerHTML = "未检测到钱包。请用 MetaMask、OKX 钱包或 TokenPocket 打开。";
+          return;
+        }
+
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+
+        const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+
+        if (currentChainId !== BSC_CHAIN_ID) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: BSC_CHAIN_ID }]
+            });
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                  chainId: BSC_CHAIN_ID,
+                  chainName: "BNB Smart Chain",
+                  nativeCurrency: {
+                    name: "BNB",
+                    symbol: "BNB",
+                    decimals: 18
+                  },
+                  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+                  blockExplorerUrls: ["https://bscscan.com"]
+                }]
+              });
+            } else {
+              walletStatusEl.innerHTML = "请切换到 BSC 网络后再试。";
+              return;
+            }
+          }
+        }
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+
+        const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
+
+        let decimals = 18;
+        let symbol = "TOKEN";
+
+        try {
+          decimals = await token.decimals();
+        } catch (e) {}
+
+        try {
+          symbol = await token.symbol();
+        } catch (e) {}
+
+        const rawBalance = await token.balanceOf(address);
+        const tokenBalance = Number(ethers.utils.formatUnits(rawBalance, decimals));
+
+        walletConnected = true;
+
+        if (tokenBalance >= MIN_TOKEN_AMOUNT) {
+          allowedToPlay = true;
+          gameAreaEl.classList.remove("locked");
+
+          walletStatusEl.innerHTML =
+            "钱包已连接<br>" +
+            shortAddress(address) + "<br>" +
+            "持币：" + tokenBalance.toFixed(4) + " " + symbol + "<br>" +
+            "已获得游戏权限";
+
+          statusEl.innerText = "持币检测通过，可以开始游戏";
+        } else {
+          allowedToPlay = false;
+          gameAreaEl.classList.add("locked");
+
+          walletStatusEl.innerHTML =
+            "钱包已连接<br>" +
+            shortAddress(address) + "<br>" +
+            "当前持币：" + tokenBalance.toFixed(4) + " " + symbol + "<br>" +
+            "至少需要持有 " + MIN_TOKEN_AMOUNT + " " + symbol + " 才能玩";
+        }
+
+      } catch (error) {
+        walletStatusEl.innerHTML = "连接失败：" + (error.message || "未知错误");
+      }
+    }
+
+    function shortAddress(address) {
+      return address.slice(0, 6) + "..." + address.slice(-4);
+    }
 
     function updateBalance() {
       balanceEl.innerText = balance.toFixed(0);
@@ -214,6 +365,11 @@
     }
 
     function startGame() {
+      if (!allowedToPlay) {
+        statusEl.innerText = "请先连接钱包并通过持币检测";
+        return;
+      }
+
       if (playing) return;
 
       betAmount = Number(betEl.value);
@@ -263,8 +419,8 @@
       const win = betAmount * point;
       balance += win;
 
-      statusEl.innerHTML = `逃跑成功，获得 ${win.toFixed(0)} 分`;
-      addHistory(`逃跑成功：${point.toFixed(2)}x，赢得 ${win.toFixed(0)} 分`, true);
+      statusEl.innerHTML = "逃跑成功，获得 " + win.toFixed(0) + " 分";
+      addHistory("逃跑成功：" + point.toFixed(2) + "x，赢得 " + win.toFixed(0) + " 分", true);
 
       endGame();
     }
@@ -274,8 +430,8 @@
 
       pointEl.innerText = crashPoint.toFixed(2) + "x";
       pointEl.style.color = "#ef4444";
-      statusEl.innerHTML = `爆了！爆点：${crashPoint.toFixed(2)}x`;
-      addHistory(`爆了：${crashPoint.toFixed(2)}x，损失 ${betAmount} 分`, false);
+      statusEl.innerHTML = "爆了！爆点：" + crashPoint.toFixed(2) + "x";
+      addHistory("爆了：" + crashPoint.toFixed(2) + "x，损失 " + betAmount + " 分", false);
 
       endGame();
     }
